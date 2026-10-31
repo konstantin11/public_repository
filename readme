@@ -1,0 +1,5 @@
+curl -fsSL \
+  https://raw.githubusercontent.com/konstantin11/public_repository/master/install_zapret.sh \
+  -o /root/install_zapret.sh \
+&& chmod +x /root/install_zapret.sh \
+&& bash /root/install_zapret.sh

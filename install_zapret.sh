@@ -38,13 +38,17 @@ fi
 
 cd "$D"
 
-expect <<'EXPECT'
-set timeout 600
-log_user 1
-
 spawn ./install_easy.sh
 
 expect {
+    -re {select firewall type.*} {
+        send "2\r"
+        exp_continue
+    }
+    -re {your choice.*default.*nftables.*} {
+        send "\r"
+        exp_continue
+    }
     -re {copy it for you.*\(Y/N\)} {
         send "Y\r"
         exp_continue
@@ -52,10 +56,6 @@ expect {
     eof {
         catch wait result
         exit [lindex $result 3]
-    }
-    timeout {
-        puts "ОШИБКА: таймаут установщика"
-        exit 124
     }
 }
 EXPECT
