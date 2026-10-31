@@ -38,6 +38,10 @@ fi
 
 cd "$D"
 
+expect <<'EXPECT'
+set timeout 600
+log_user 1
+
 spawn ./install_easy.sh
 
 expect {
