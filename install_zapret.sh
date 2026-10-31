@@ -13,8 +13,9 @@ apt-get install -y curl ca-certificates tar expect
 
 cd /tmp
 
-V=$(curl -fsSL https://api.github.com/repos/bol-van/zapret/releases/latest |
-    grep -m1 '"tag_name"' | cut -d '"' -f4)
+RELEASE_JSON=$(curl -fsSL https://api.github.com/repos/bol-van/zapret/releases/latest)
+
+V=$(printf '%s\n' "$RELEASE_JSON" | sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1)
 
 if [ -z "$V" ]; then
     echo "ОШИБКА: версия Zapret не определена"
@@ -39,22 +40,39 @@ fi
 cd "$D"
 
 expect <<'EXPECT'
-set timeout 600
+set timeout -1
 log_user 1
 
 spawn ./install_easy.sh
 
 expect {
     -re {select firewall type.*} {
-        send "2\r"
+        send "\r"
         exp_continue
     }
-    -re {your choice.*default.*nftables.*} {
+    -re {keep config.*custom scripts.*user lists.*\(Y/N\)} {
         send "\r"
+        exp_continue
+    }
+    -re {your choice.*} {
+        send "\r"
+        exp_continue
+    }
+    -re {do you want to delete all files there.*\(Y/N\)} {
+        send "Y\r"
         exp_continue
     }
     -re {copy it for you.*\(Y/N\)} {
         send "Y\r"
+        exp_continue
+    }
+    -re {press enter to continue} {
+        send "\r"
+        exp_continue
+    }
+    # Ответ Enter на неизвестные вопросы Y/N
+    -re {[^:\n]*\([Yy]/[Nn]\)[^:\n]*[?:] ?$} {
+        send "\r"
         exp_continue
     }
     eof {
